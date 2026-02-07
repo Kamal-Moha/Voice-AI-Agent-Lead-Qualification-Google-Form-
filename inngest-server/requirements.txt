@@ -1,0 +1,5 @@
+fastapi[standard]
+inngest
+livekit-agents
+pydantic-ai
+python-dotenv

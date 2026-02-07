@@ -1,0 +1,6 @@
+livekit-plugins-aws[realtime]
+livekit-plugins-noise-cancellation~=0.2
+google-genai
+python-dotenv
+inngest
+google-cloud-storage

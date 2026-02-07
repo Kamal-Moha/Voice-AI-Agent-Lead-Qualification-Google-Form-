@@ -1,0 +1,100 @@
+name: Deploy LiveKit Agent to GCE Github Workflow
+
+on:
+  push:
+    # branches: [main]
+    paths:
+        - 'livekit-voice-agent/**'
+        - '!livekit-voice-agent/README.md'
+
+permissions:
+  contents: read
+  id-token: write # Required for Workload Identity Federation
+
+env:
+  GCP_VM_NAME: google-form-lead-qualification-voice-agent
+  GCP_ZONE: us-east1-d
+  GCP_PROJECT_ID: dogwood-flames-456218-g1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code 🗳️
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Google Cloud 🔒☁️
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud SDK 🪛⚙️
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          
+      - name: Disable gcloud prompts
+        run: gcloud config set core/disable_prompts true
+
+      - name: Zip source code (exclude .git) 🤐
+        run: |
+          zip -r livekit-agent.zip . -x ".git/*"
+
+      - name: Upload ZIP to VM ⬆️☁️🖥️
+        run: |
+          # CHANGE: Using 'gcloud beta' to support WIF for SSH/SCP.
+          gcloud beta compute scp livekit-agent.zip bhadala_kamalmohapy@${{ env.GCP_VM_NAME }}:~ \
+            --project=${{ env.GCP_PROJECT_ID }} \
+            --zone=${{ env.GCP_ZONE }}
+
+      - name: Prepare and deploy on VM 🚀🖥️
+        run: |
+          # CHANGE: Using 'gcloud beta' here as well.
+          gcloud beta compute ssh bhadala_kamalmohapy@${{ env.GCP_VM_NAME }} \
+              --project=${{ env.GCP_PROJECT_ID }} \
+              --zone=${{ env.GCP_ZONE }} \
+              --command='
+                set -e
+                echo "Ensuring unzip is installed..."
+                sudo apt-get update && sudo apt-get install -y unzip
+                echo "Cleaning previous deployment..."
+                rm -rf ~/livekit-agent
+                mkdir ~/livekit-agent
+                echo "Unzipping..."
+                unzip -o ~/livekit-agent.zip -d ~/livekit-agent
+
+                # ⬇️ Fetch secrets from Google Secrets Manager ⬇️
+                echo "Fetching secrets from Secrets Manager..."
+                LIVEKIT_API_KEY=$(gcloud secrets versions access 1 --secret="LIVEKIT_API_KEY")
+                LIVEKIT_API_SECRET=$(gcloud secrets versions access 1 --secret="LIVEKIT_API_SECRET")
+                LIVEKIT_URL=$(gcloud secrets versions access 1 --secret="LIVEKIT_URL")
+                INNGEST_EVENT_KEY=$(gcloud secrets versions access 1 --secret="INNGEST_EVENT_KEY")
+                INNGEST_SIGNING_KEY=$(gcloud secrets versions access 1 --secret="INNGEST_SIGNING_KEY")
+                AWS_ACCESS_KEY_ID=$(gcloud secrets versions access 1 --secret="AWS_ACCESS_KEY_ID")
+                AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access 1 --secret="AWS_SECRET_ACCESS_KEY")
+                
+                echo "Building Docker image..."
+                cd ~/livekit-agent 
+                sudo docker build -t livekit-agent .
+                echo "Restarting container..."
+                sudo docker stop livekit-agent || true
+                sudo docker rm livekit-agent || true
+                sudo docker run \
+                  --memory="12gb" \
+                  --cpus="2.0" \
+                  -d \
+                  --restart=always \
+                  -e LIVEKIT_API_KEY="$LIVEKIT_API_KEY" \
+                  -e LIVEKIT_API_SECRET="$LIVEKIT_API_SECRET" \
+                  -e LIVEKIT_URL="$LIVEKIT_URL" \
+                  -e INNGEST_EVENT_KEY="$INNGEST_EVENT_KEY" \
+                  -e INNGEST_SIGNING_KEY="$INNGEST_SIGNING_KEY" \
+                  -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
+                  -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+
+                  --name livekit-agent livekit-agent
+                echo "Cleaning up unused images..."
+                sudo docker image prune -f || true
+              '
