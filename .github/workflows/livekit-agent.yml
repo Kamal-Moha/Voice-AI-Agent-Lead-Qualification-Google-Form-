@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'livekit-voice-agent/**'
+      - '.github/workflows/livekit-agent.yml'
       - '!livekit-voice-agent/README.md'
 
 permissions:
@@ -45,14 +46,14 @@ jobs:
       - name: Upload ZIP to VM ⬆️☁️🖥️
         run: |
           # CHANGE: Using 'gcloud beta' to support WIF for SSH/SCP.
-          gcloud beta compute scp livekit-agent.zip bhadala_kamalmohapy@${{ env.GCP_VM_NAME }}:~ \
+          gcloud beta compute scp livekit-agent.zip ${{ env.GCP_PROJECT_ID }}@${{ env.GCP_VM_NAME }}:~ \
             --project=${{ env.GCP_PROJECT_ID }} \
             --zone=${{ env.GCP_ZONE }}
 
       - name: Prepare and deploy on VM 🚀🖥️
         run: |
           # CHANGE: Using 'gcloud beta' here as well.
-          gcloud beta compute ssh bhadala_kamalmohapy@${{ env.GCP_VM_NAME }} \
+          gcloud beta compute ssh ${{ env.GCP_PROJECT_ID }}@${{ env.GCP_VM_NAME }} \
               --project=${{ env.GCP_PROJECT_ID }} \
               --zone=${{ env.GCP_ZONE }} \
               --command='
@@ -67,16 +68,16 @@ jobs:
 
                 # ⬇️ Fetch secrets from Google Secrets Manager ⬇️
                 echo "Fetching secrets from Secrets Manager..."
-                LIVEKIT_API_KEY=$(gcloud secrets versions access 1 --secret="LIVEKIT_API_KEY")
-                LIVEKIT_API_SECRET=$(gcloud secrets versions access 1 --secret="LIVEKIT_API_SECRET")
-                LIVEKIT_URL=$(gcloud secrets versions access 1 --secret="LIVEKIT_URL")
-                INNGEST_EVENT_KEY=$(gcloud secrets versions access 1 --secret="INNGEST_EVENT_KEY")
-                INNGEST_SIGNING_KEY=$(gcloud secrets versions access 1 --secret="INNGEST_SIGNING_KEY")
-                AWS_ACCESS_KEY_ID=$(gcloud secrets versions access 1 --secret="AWS_ACCESS_KEY_ID")
-                AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access 1 --secret="AWS_SECRET_ACCESS_KEY")
+                LIVEKIT_API_KEY=$(gcloud secrets versions access latest --secret="LIVEKIT_API_KEY")
+                LIVEKIT_API_SECRET=$(gcloud secrets versions access latest --secret="LIVEKIT_API_SECRET")
+                LIVEKIT_URL=$(gcloud secrets versions access latest --secret="LIVEKIT_URL")
+                INNGEST_EVENT_KEY=$(gcloud secrets versions access latest --secret="INNGEST_EVENT_KEY")
+                INNGEST_SIGNING_KEY=$(gcloud secrets versions access latest --secret="INNGEST_SIGNING_KEY")
+                AWS_ACCESS_KEY_ID=$(gcloud secrets versions access latest --secret="AWS_ACCESS_KEY_ID")
+                AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access latest --secret="AWS_SECRET_ACCESS_KEY")
                 
                 echo "Building Docker image..."
-                cd ~/livekit-agent 
+                cd ~/livekit-voice-agent 
                 sudo docker build -t livekit-agent .
                 echo "Restarting container..."
                 sudo docker stop livekit-agent || true
