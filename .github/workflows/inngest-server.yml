@@ -12,7 +12,6 @@ env:
   GCP_PROJECT_ID: dogwood-flames-456218-g1
   REGION: 'us-east1'
   SERVICE: 'inngest-server-fastapi'
-  PORT: 8000
   
 jobs:
   deploy:
@@ -74,9 +73,8 @@ jobs:
             SIP_OUTBOUND_TRUNK_ID=SIP_OUTBOUND_TRUNK_ID:latest
             GITHUB_API_KEY=GITHUB_API_KEY:latest
             APPS_SCRIPT_WEB_APP=APPS_SCRIPT_WEB_APP:latest
-          flags:
-            --port='${{ env.PORT }}'
-            --allow-unauthenticated
+          flags: '--allow-unauthenticated --port=8000'
+          
           
       # If required, use the Cloud Run URL output in later steps
       - name: 'Show output'
