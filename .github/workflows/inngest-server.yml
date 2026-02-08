@@ -73,8 +73,8 @@ jobs:
             SIP_OUTBOUND_TRUNK_ID=SIP_OUTBOUND_TRUNK_ID:latest
             GITHUB_API_KEY=GITHUB_API_KEY:latest
             APPS_SCRIPT_WEB_APP=APPS_SCRIPT_WEB_APP:latest
-          flags: '--allow-unauthenticated --port=8000'
-          
+          flags: 
+            '--allow-unauthenticated --port=8000 --service-account=${{ secrets.GCP_SERVICE_ACCOUNT }}'
           
       # If required, use the Cloud Run URL output in later steps
       - name: 'Show output'
