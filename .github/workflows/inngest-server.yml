@@ -65,14 +65,14 @@ jobs:
           region: '${{ env.REGION }}'
           image: '${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/cicd-app-img'
           secrets: |
-            INNGEST_EVENT_KEY=INNGEST_EVENT_KEY:1
-            INNGEST_SIGNING_KEY=INNGEST_SIGNING_KEY:1
-            LIVEKIT_API_KEY=LIVEKIT_API_KEY:1
-            LIVEKIT_API_SECRET=LIVEKIT_API_SECRET:1
-            LIVEKIT_URL=LIVEKIT_URL:1
-            SIP_OUTBOUND_TRUNK_ID=SIP_OUTBOUND_TRUNK_ID:1
-            GITHUB_API_KEY=GITHUB_API_KEY:1
-            APPS_SCRIPT_WEB_APP=APPS_SCRIPT_WEB_APP:1
+            INNGEST_EVENT_KEY=INNGEST_EVENT_KEY:latest
+            INNGEST_SIGNING_KEY=INNGEST_SIGNING_KEY:latest
+            LIVEKIT_API_KEY=LIVEKIT_API_KEY:latest
+            LIVEKIT_API_SECRET=LIVEKIT_API_SECRET:latest
+            LIVEKIT_URL=LIVEKIT_URL:latest
+            SIP_OUTBOUND_TRUNK_ID=SIP_OUTBOUND_TRUNK_ID:latest
+            GITHUB_API_KEY=GITHUB_API_KEY:latest
+            APPS_SCRIPT_WEB_APP=APPS_SCRIPT_WEB_APP:latest
           flags: '--allow-unauthenticated --port=8000'
           
           
