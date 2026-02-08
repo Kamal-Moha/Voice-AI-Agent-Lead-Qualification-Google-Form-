@@ -54,7 +54,8 @@ jobs:
           cd inngest-server
           docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
-      - name: 'Deploy to Cloud Run'
+      - name: 'Deploy to Cloud Run'\
+        id: deploy
 
         # END - Docker auth and build
 
