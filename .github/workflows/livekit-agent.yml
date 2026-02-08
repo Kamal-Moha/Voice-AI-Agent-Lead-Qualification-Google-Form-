@@ -68,13 +68,13 @@ jobs:
 
                 # ⬇️ Fetch secrets from Google Secrets Manager ⬇️
                 echo "Fetching secrets from Secrets Manager..."
-                LIVEKIT_API_KEY=$(gcloud secrets versions access latest --secret="LIVEKIT_API_KEY")
-                LIVEKIT_API_SECRET=$(gcloud secrets versions access latest --secret="LIVEKIT_API_SECRET")
-                LIVEKIT_URL=$(gcloud secrets versions access latest --secret="LIVEKIT_URL")
-                INNGEST_EVENT_KEY=$(gcloud secrets versions access latest --secret="INNGEST_EVENT_KEY")
-                INNGEST_SIGNING_KEY=$(gcloud secrets versions access latest --secret="INNGEST_SIGNING_KEY")
-                AWS_ACCESS_KEY_ID=$(gcloud secrets versions access latest --secret="AWS_ACCESS_KEY_ID")
-                AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access latest --secret="AWS_SECRET_ACCESS_KEY")
+                LIVEKIT_API_KEY=$(gcloud secrets versions access 1 --secret="LIVEKIT_API_KEY")
+                LIVEKIT_API_SECRET=$(gcloud secrets versions access 1 --secret="LIVEKIT_API_SECRET")
+                LIVEKIT_URL=$(gcloud secrets versions access 1 --secret="LIVEKIT_URL")
+                INNGEST_EVENT_KEY=$(gcloud secrets versions access 1 --secret="INNGEST_EVENT_KEY")
+                INNGEST_SIGNING_KEY=$(gcloud secrets versions access 1 --secret="INNGEST_SIGNING_KEY")
+                AWS_ACCESS_KEY_ID=$(gcloud secrets versions access 1 --secret="AWS_ACCESS_KEY_ID")
+                AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access 1 --secret="AWS_SECRET_ACCESS_KEY")
                 
                 echo "Building Docker image..."
                 cd ~/livekit-voice-agent 
