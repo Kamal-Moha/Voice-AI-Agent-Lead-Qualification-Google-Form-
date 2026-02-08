@@ -141,10 +141,8 @@ async def send_to_google_sheet(data: JsonFileOutput, name: str, phone_number: st
       data['name'] = name
       data['phone_number'] = phone_number
       payload = json.dumps(data)
-
       print(f"PAYLOAD: {payload}")
-
-
+      
       # Make the POST request
       response = requests.post(apps_script_url, data=payload, headers=headers)
       response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
