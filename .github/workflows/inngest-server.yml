@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'inngest-server/**'
+      - '.github/workflows/inngest-server.yml'
       - '!inngest-server/README.md'
 
 env:
@@ -50,6 +51,7 @@ jobs:
         run: |-
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/cicd-app-img"
           echo "${DOCKER_TAG}"
+          cd inngest-server
           docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
       - name: 'Deploy to Cloud Run'
