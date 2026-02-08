@@ -2,10 +2,10 @@ name: Deploy LiveKit Agent to GCE Github Workflow
 
 on:
   push:
-    # branches: [main]
+    branches: [main]
     paths:
-        - 'livekit-voice-agent/**'
-        - '!livekit-voice-agent/README.md'
+      - 'livekit-voice-agent/**'
+      - '!livekit-voice-agent/README.md'
 
 permissions:
   contents: read
