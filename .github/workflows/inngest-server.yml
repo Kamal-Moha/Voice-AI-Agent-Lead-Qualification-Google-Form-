@@ -3,8 +3,8 @@ name: 'Build and Deploy to Cloud Run'
 on:
   push:
     paths:
-        - 'inngest-server/**'
-        - '!inngest-server/README.md'
+      - 'inngest-server/**'
+      - '!inngest-server/README.md'
 
 env:
   REGION: 'us-east1'
