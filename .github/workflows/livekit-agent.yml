@@ -77,7 +77,7 @@ jobs:
                 AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access latest --secret="AWS_SECRET_ACCESS_KEY")
                 
                 echo "Building Docker image..."
-                cd ~/livekit-voice-agent 
+                cd ~/livekit-agent/livekit-voice-agent 
                 sudo docker build -t livekit-agent .
                 echo "Restarting container..."
                 sudo docker stop livekit-agent || true
