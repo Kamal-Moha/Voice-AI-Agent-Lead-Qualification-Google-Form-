@@ -2,8 +2,13 @@ from dotenv import load_dotenv
 
 from livekit import agents, rtc
 from livekit.agents import AgentServer, AgentSession, Agent, room_io
+from livekit.plugins.turn_detector.multilingual import MultilingualModel
+from livekit.plugins.turn_detector.english import EnglishModel
 from livekit.plugins import (
+    silero,
     aws,
+    cartesia,
+    google,
     noise_cancellation,
 )
 
@@ -95,10 +100,7 @@ async def my_agent(ctx: agents.JobContext):
 
     public_url = get_cs_file_url("voice-ai-call-transcripts", filename)
     print(f"Transcript for {ctx.room.name} saved to {public_url}")
-
-    # print(f"Transcript for {ctx.room.name} saved to {filename}")
-
-
+    
     # Prepare data to trigger event in inngest
     payload = {
         "transcript_url": public_url,
@@ -121,11 +123,28 @@ async def my_agent(ctx: agents.JobContext):
   ctx.add_shutdown_callback(write_transcript)
 
 
-  # Amazon Nova Sonic
+#   # Amazon Nova Sonic
+#   session = AgentSession(
+#     llm=aws.realtime.RealtimeModel(
+#         voice="tiffany"
+#     ),
+#   )
+
+  # STT-LLM-TTS Pipeline
   session = AgentSession(
-    llm=aws.realtime.RealtimeModel(
-        voice="tiffany"
+    stt = cartesia.STT(
+        model="ink-whisper"
     ),
+    llm=google.LLM(
+        model="gemini-3-flash-preview",
+    ),
+    tts=cartesia.TTS(
+        model="sonic-3",
+        # voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",
+        voice="228fca29-3a0a-435c-8728-5cb483251068"
+    ),
+    turn_detection=EnglishModel(),
+    vad=silero.VAD.load()
   )
 
 
