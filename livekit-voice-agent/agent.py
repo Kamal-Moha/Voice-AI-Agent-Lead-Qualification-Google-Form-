@@ -15,7 +15,7 @@ from livekit.plugins import (
 # import packages
 from google.cloud import storage
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import json, httpx, logging
 import inngest
 
@@ -39,17 +39,27 @@ def upload_cs_file(bucket_name, source_file_name, destination_file_name):
 
     return True
 
-from datetime import datetime, timedelta
+def get_cs_file_url(bucket_name, gcs_path, expire_in=None):
+    # Fix the timing bug: calculate "tomorrow" at call time, not boot time
+    if expire_in is None:
+        expire_in = datetime.utcnow() + timedelta(days=1)
+    
+    full_path = gcs_path.lstrip('/')
 
-# define function that generates the public URL, default expiration is set to 24 hours
-def get_cs_file_url(bucket_name, file_name, expire_in=datetime.today() + timedelta(1)):
-    storage_client = storage.Client()
+    try:
+        # Attempt to generate a signed URL
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(full_path)
+        
+        # This is where the AttributeError would happen if signing fails
+        url = blob.generate_signed_url(expiration=expire_in)
+        return url
 
-    bucket = storage_client.bucket(bucket_name)
-    url = bucket.blob(file_name).generate_signed_url(expire_in)
-
-    return url
-
+    except Exception as e:
+        # Fallback to public URL if signing fails or credentials lack permissions
+        print(f"Signing failed, defaulting to public URL. Error: {e}")
+        return f"https://storage.googleapis.com/{bucket_name}/{full_path}"
 
 class ContextAgent(Agent):
   def __init__(self, context_vars=None) -> None:
@@ -88,17 +98,26 @@ async def my_agent(ctx: agents.JobContext):
   print(f"Participant Name: {participant.attributes['name']}")
 
   async def write_transcript():
-    current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
-    print(f"Curent Date: {current_date}")
-    # This example writes to the temporary directory, but you can save to any location
-    filename = f"/transcript_{ctx.room.name}_{current_date}.json"
+    # Folder-friendly date (YYYY-MM-DD)
+    folder_date = datetime.now().strftime("%Y-%m-%d") 
+    
+    # Precise timestamp for the filename (to avoid overwriting)
+    timestamp = datetime.now().strftime("%H%M%S")
+    
+    # Path inside GCS: i.e "2026-02-10/transcript_room-name_130202.json"
+    gcs_path = f"{folder_date}/transcript_{ctx.room.name}_{timestamp}.json"
+    
+    # Local path for writing the file temporarily on the VM disk
+    # We use a simple name locally to avoid needing to create local folders
+    filename = f"tmp_{timestamp}.json"
+
     with open(filename, 'w') as f:
         json.dump(session.history.to_dict(), f, indent=2)
 
     # Saving to Google Cloud
-    upload_cs_file("voice-ai-call-transcripts", filename, filename)
+    upload_cs_file("voice-ai-call-transcripts", filename, gcs_path)
 
-    public_url = get_cs_file_url("voice-ai-call-transcripts", filename)
+    public_url = get_cs_file_url("voice-ai-call-transcripts", gcs_path)
     print(f"Transcript for {ctx.room.name} saved to {public_url}")
     
     # Prepare data to trigger event in inngest

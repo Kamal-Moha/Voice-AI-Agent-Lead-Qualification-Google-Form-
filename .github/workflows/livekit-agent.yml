@@ -14,8 +14,9 @@ permissions:
 
 env:
   GCP_VM_NAME: google-form-lead-qualification-voice-agent
-  GCP_ZONE: us-east1-d
+  GCP_ZONE: africa-southt1-c
   GCP_PROJECT_ID: dogwood-flames-456218-g1
+  WHOAMI: kamalscraping
 
 jobs:
   deploy:
@@ -46,14 +47,14 @@ jobs:
       - name: Upload ZIP to VM ⬆️☁️🖥️
         run: |
           # CHANGE: Using 'gcloud beta' to support WIF for SSH/SCP.
-          gcloud beta compute scp livekit-agent.zip kamalscraping@${{ env.GCP_VM_NAME }}:~ \
+          gcloud beta compute scp livekit-agent.zip ${{ env.WHOAMI }}@${{ env.GCP_VM_NAME }}:~ \
             --project=${{ env.GCP_PROJECT_ID }} \
             --zone=${{ env.GCP_ZONE }}
 
       - name: Prepare and deploy on VM 🚀🖥️
         run: |
           # CHANGE: Using 'gcloud beta' here as well.
-          gcloud beta compute ssh kamalscraping@${{ env.GCP_VM_NAME }} \
+          gcloud beta compute ssh ${{ env.WHOAMI }}@${{ env.GCP_VM_NAME }} \
               --project=${{ env.GCP_PROJECT_ID }} \
               --zone=${{ env.GCP_ZONE }} \
               --command='
