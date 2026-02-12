@@ -10,7 +10,7 @@ on:
 env:
   ARTIFACT_REPO: 'inngest-server'
   GCP_PROJECT_ID: dogwood-flames-456218-g1
-  REGION: 'us-east1'
+  REGION: 'us-west1'
   SERVICE: 'inngest-server-fastapi'
   
 jobs:
