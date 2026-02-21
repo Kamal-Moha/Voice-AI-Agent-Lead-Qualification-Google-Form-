@@ -29,6 +29,8 @@ inngest_client = inngest.Inngest(
     is_production=True
 )
 
+bucket_name = "voice_ai_call_transcripts"
+
 # define function that uploads a file from the bucket
 def upload_cs_file(bucket_name, source_file_name, destination_file_name):
     storage_client = storage.Client()
@@ -113,9 +115,9 @@ async def my_agent(ctx: agents.JobContext):
         json.dump(session.history.to_dict(), f, indent=2)
 
     # Saving to Google Cloud
-    upload_cs_file("voice-ai-call-transcripts", filename, gcs_path)
+    upload_cs_file(bucket_name, filename, gcs_path)
 
-    public_url = get_cs_file_url("voice-ai-call-transcripts", gcs_path)
+    public_url = get_cs_file_url(bucket_name, gcs_path)
     print(f"Transcript for {ctx.room.name} saved to {public_url}")
     
     # Prepare data to trigger event in inngest

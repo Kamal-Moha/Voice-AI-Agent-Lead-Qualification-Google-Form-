@@ -14,8 +14,6 @@ permissions:
 env:
   GCP_VM_NAME: google-form-lead-qualification-voice-agent
   GCP_ZONE: us-west1-c
-  GCP_PROJECT_ID: dogwood-flames-456218-g1
-  WHOAMI: kamalscraping
 
 jobs:
   deploy:
@@ -34,7 +32,7 @@ jobs:
       - name: Setup gcloud SDK 🪛⚙️
         uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ${{ env.GCP_PROJECT_ID }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           
       - name: Disable gcloud prompts
         run: gcloud config set core/disable_prompts true
@@ -46,15 +44,15 @@ jobs:
       - name: Upload ZIP to VM ⬆️☁️🖥️
         run: |
           # CHANGE: Using 'gcloud beta' to support WIF for SSH/SCP.
-          gcloud beta compute scp livekit-agent.zip ${{ env.WHOAMI }}@${{ env.GCP_VM_NAME }}:~ \
-            --project=${{ env.GCP_PROJECT_ID }} \
+          gcloud beta compute scp livekit-agent.zip ${{ secrets.WHOAMI }}@${{ env.GCP_VM_NAME }}:~ \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
             --zone=${{ env.GCP_ZONE }}
 
       - name: Prepare and deploy on VM 🚀🖥️
         run: |
           # CHANGE: Using 'gcloud beta' here as well.
-          gcloud beta compute ssh ${{ env.WHOAMI }}@${{ env.GCP_VM_NAME }} \
-              --project=${{ env.GCP_PROJECT_ID }} \
+          gcloud beta compute ssh ${{ secrets.WHOAMI }}@${{ env.GCP_VM_NAME }} \
+              --project=${{ secrets.GCP_PROJECT_ID }} \
               --zone=${{ env.GCP_ZONE }} \
               --command='
                 set -e
