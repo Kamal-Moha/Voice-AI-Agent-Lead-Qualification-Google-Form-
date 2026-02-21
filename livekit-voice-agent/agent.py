@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
 from livekit import agents, rtc
-from livekit.agents import AgentServer, AgentSession, Agent, room_io
+from livekit.agents import AgentServer, AgentSession, Agent, room_io, mcp
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from livekit.plugins.turn_detector.english import EnglishModel
 from livekit.plugins import (
@@ -19,6 +19,7 @@ from datetime import datetime, timedelta
 import json, httpx, logging
 import inngest
 
+from utils import load_prompt
 load_dotenv()
 
 # Create an Inngest client
@@ -63,16 +64,7 @@ def get_cs_file_url(bucket_name, gcs_path, expire_in=None):
 
 class ContextAgent(Agent):
   def __init__(self, context_vars=None) -> None:
-    instructions = """
-        You are a helpful service assistant.
-
-        The user's name is {name} and their phone is {phone}.
-        They reported an issue: {issue} at a {place_type}.
-        The issue started at: {issue_start}, urgency: {job_urgency}.
-        Service address: {address}, service needed: {needed}.
-
-        Preferred visit date: {preferred_visit_date}, time: {preferred_visit_time}.
-    """
+    instructions = load_prompt("agent_instructions.yaml")
 
     if context_vars:
       instructions = instructions.format(**context_vars)
@@ -81,7 +73,13 @@ class ContextAgent(Agent):
 
   async def on_enter(self):
     self.session.generate_reply(
-        instructions="Greet ther user and offer your assistance. You should start by speaking in English."
+       instructions="""
+        Greet the customer by saying;
+        For example;
+        Hi {name}, I'm Linda from Dalabey Plumbing Services. I have seen you have recently filled our Google form.
+        Offer your assistance. You should start by speaking in English.
+
+        """
     )
 
 server = AgentServer()
@@ -142,7 +140,7 @@ async def my_agent(ctx: agents.JobContext):
   ctx.add_shutdown_callback(write_transcript)
 
 
-#   # Amazon Nova Sonic
+#   # Amazon Nova Sonic (Realtime)
 #   session = AgentSession(
 #     llm=aws.realtime.RealtimeModel(
 #         voice="tiffany"
@@ -159,13 +157,18 @@ async def my_agent(ctx: agents.JobContext):
     ),
     tts=cartesia.TTS(
         model="sonic-3",
-        # voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",
-        voice="228fca29-3a0a-435c-8728-5cb483251068"
+        voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",
+        # voice="228fca29-3a0a-435c-8728-5cb483251068"
     ),
     turn_detection=EnglishModel(),
-    vad=silero.VAD.load()
-  )
+    vad=silero.VAD.load(),
+    mcp_servers=[
+        mcp.MCPServerHTTP(
+            "https://d8ad-102-209-109-143.ngrok-free.app/mcp"
+        )
+    ]
 
+  )
 
   await session.start(
      
@@ -176,10 +179,6 @@ async def my_agent(ctx: agents.JobContext):
             noise_cancellation=lambda params: noise_cancellation.BVCTelephony() if params.participant.kind == rtc.ParticipantKind.PARTICIPANT_KIND_SIP else noise_cancellation.BVC(),
         ),
     ),
-  )
-
-  await session.generate_reply(
-    instructions="Greet the user and offer your assistance. You should start by speaking in English."
   )
 
 

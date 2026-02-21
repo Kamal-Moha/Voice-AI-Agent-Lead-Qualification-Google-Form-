@@ -105,8 +105,10 @@ async def make_call(data: InputData) -> None:
           )
       )
       logger.info(f"Created SIP participant: {sip_participant}")
+      return f"Created SIP participant: {sip_participant}"
   except Exception as e:
       logger.error(f"Error creating SIP participant: {e}")
+      return f"Error creating SIP participant: {e}"
 
   # Close API connection
   await lkapi.aclose()

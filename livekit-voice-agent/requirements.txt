@@ -1,6 +1,7 @@
-livekit-agents[aws, google, turn-detector, silero, cartesia]~=1.3
+livekit-agents[aws,google,turn-detector,silero,cartesia,mcp]~=1.4
 livekit-plugins-noise-cancellation~=0.2
 google-genai
 python-dotenv
 inngest
 google-cloud-storage
+pyyaml
