@@ -2,7 +2,6 @@ name: Deploy LiveKit Agent to GCE Github Workflow
 
 on:
   push:
-    branches: [main]
     paths:
       - 'livekit-voice-agent/**'
       - '.github/workflows/livekit-agent.yml'
@@ -14,7 +13,7 @@ permissions:
 
 env:
   GCP_VM_NAME: google-form-lead-qualification-voice-agent
-  GCP_ZONE: africa-south1-c
+  GCP_ZONE: us-west1-c
   GCP_PROJECT_ID: dogwood-flames-456218-g1
   WHOAMI: kamalscraping
 
