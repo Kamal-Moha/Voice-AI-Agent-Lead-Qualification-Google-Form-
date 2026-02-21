@@ -9,7 +9,6 @@ on:
 
 env:
   ARTIFACT_REPO: 'inngest-server'
-  GCP_PROJECT_ID: dogwood-flames-456218-g1
   REGION: 'us-west1'
   SERVICE: 'inngest-server-fastapi'
   PORT: 8000
@@ -50,7 +49,7 @@ jobs:
 
       - name: 'Build and Push Container'
         run: |-
-          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/cicd-app-img"
+          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/cicd-app-img"
           echo "${DOCKER_TAG}"
           cd inngest-server
           docker build --tag "${DOCKER_TAG}" .
@@ -64,7 +63,7 @@ jobs:
         with:
           service: '${{ env.SERVICE }}'
           region: '${{ env.REGION }}'
-          image: '${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/cicd-app-img'
+          image: '${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/cicd-app-img'
           secrets: |
             INNGEST_EVENT_KEY=INNGEST_EVENT_KEY:latest
             INNGEST_SIGNING_KEY=INNGEST_SIGNING_KEY:latest
