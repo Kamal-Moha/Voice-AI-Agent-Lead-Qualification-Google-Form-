@@ -4,6 +4,7 @@ import yaml
 def load_prompt(filename):
   """Load a prompt from a YAML file."""
   script_dir = os.getcwd()
+  print(f"PATH DIRECTORY: {script_dir}")
   # prompt_path = os.path.join(script_dir, filename)
   prompt_path = os.path.join(f"/prompts/{filename}")
 
