@@ -46,7 +46,7 @@ class Transcript(BaseModel):
 
 # Configuration
 room_name = "my-room"
-agent_name = "test-agent"
+agent_name = "lead-qual-agent"
 outbound_trunk_id = os.getenv("SIP_OUTBOUND_TRUNK_ID")
 
 # async def make_call(name: str, phone_number: str, story: str) -> None:

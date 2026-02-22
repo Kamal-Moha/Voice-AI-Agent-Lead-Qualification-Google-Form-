@@ -28,7 +28,7 @@ inngest_client = inngest.Inngest(
     logger=logging.getLogger("uvicorn"),
     is_production=True
 )
-
+agent_name = "lead-qual-agent"
 bucket_name = "voice_ai_call_transcripts"
 
 # define function that uploads a file from the bucket
@@ -86,7 +86,7 @@ class ContextAgent(Agent):
 
 server = AgentServer()
 
-@server.rtc_session(agent_name="test-agent")
+@server.rtc_session(agent_name=agent_name)
 async def my_agent(ctx: agents.JobContext):
   # --------------
 
