@@ -28,8 +28,8 @@ inngest_client = inngest.Inngest(
     logger=logging.getLogger("uvicorn"),
     is_production=True
 )
-agent_name = "lead-qual-agent"
-bucket_name = "voice_ai_call_transcripts"
+agent_name = "voice-agent"
+bucket_name = "ai-call-transcripts"
 
 # define function that uploads a file from the bucket
 def upload_cs_file(bucket_name, source_file_name, destination_file_name):
@@ -166,7 +166,7 @@ async def my_agent(ctx: agents.JobContext):
     vad=silero.VAD.load(),
     mcp_servers=[
         mcp.MCPServerHTTP(
-            "https://d8ad-102-209-109-143.ngrok-free.app/mcp"
+            "https://d095-102-209-109-143.ngrok-free.app/mcp"
         )
     ]
 
