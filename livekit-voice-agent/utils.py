@@ -5,7 +5,7 @@ def load_prompt(filename):
   """Load a prompt from a YAML file."""
   script_dir = os.getcwd()
   # prompt_path = os.path.join(script_dir, filename)
-  prompt_path = os.path.join(f"/livekit-voice-agent/prompts/{filename}")
+  prompt_path = os.path.join(f"/prompts/{filename}")
 
   try:
       with open(prompt_path, 'r') as file:
