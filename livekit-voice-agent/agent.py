@@ -155,7 +155,7 @@ async def my_agent(ctx: agents.JobContext):
         model="ink-whisper"
     ),
     llm=google.LLM(
-        model="gemini-3-flash-preview",
+        model="gemini-3.1-pro-preview",
     ),
     tts=cartesia.TTS(
         model="sonic-3",
