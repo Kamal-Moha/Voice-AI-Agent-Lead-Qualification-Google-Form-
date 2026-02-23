@@ -166,7 +166,7 @@ async def my_agent(ctx: agents.JobContext):
     vad=silero.VAD.load(),
     mcp_servers=[
         mcp.MCPServerHTTP(
-            "https://d095-102-209-109-143.ngrok-free.app/mcp"
+            "https://dc33-102-209-109-143.ngrok-free.app/mcp"
         )
     ]
 
