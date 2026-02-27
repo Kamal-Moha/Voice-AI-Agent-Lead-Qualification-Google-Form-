@@ -1,6 +1,8 @@
 name: Deploy LiveKit Agent to GCE Github Workflow
 
 on:
+  workflow_dispatch:
+    
   push:
     paths:
       - 'livekit-voice-agent/**'
