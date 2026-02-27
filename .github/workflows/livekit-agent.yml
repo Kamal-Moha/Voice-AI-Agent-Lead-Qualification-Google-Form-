@@ -73,7 +73,8 @@ jobs:
                 INNGEST_SIGNING_KEY=$(gcloud secrets versions access latest --secret="INNGEST_SIGNING_KEY")
                 CARTESIA_API_KEY=$(gcloud secrets versions access latest --secret="CARTESIA_API_KEY")
                 GOOGLE_API_KEY=$(gcloud secrets versions access latest --secret="GOOGLE_API_KEY")
-                
+                GCP_JSON_FILE_LINK=${{ secrets.GCP_JSON_FILE_LINK }}
+
                 echo "Building Docker image..."
                 cd ~/livekit-agent/livekit-voice-agent 
                 sudo docker build -t livekit-agent .
@@ -92,6 +93,7 @@ jobs:
                   -e INNGEST_SIGNING_KEY="$INNGEST_SIGNING_KEY" \
                   -e CARTESIA_API_KEY="$CARTESIA_API_KEY" \
                   -e GOOGLE_API_KEY="$GOOGLE_API_KEY" \
+                  - GCP_JSON_FILE_LINK="$GCP_JSON_FILE_LINK" \
                   --name livekit-agent livekit-agent
                 echo "Cleaning up unused images..."
                 sudo docker image prune -f || true

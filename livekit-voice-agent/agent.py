@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 
+from livekit import api
 from livekit import agents, rtc
 from livekit.agents import AgentServer, AgentSession, Agent, room_io, mcp
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
@@ -18,9 +19,16 @@ import os
 from datetime import datetime, timedelta
 import json, httpx, logging
 import inngest
+import random
+import string
+import requests
 
 from utils import load_prompt
 load_dotenv()
+
+agent_name = "voice-agent"
+bucket_name = "ai-call-transcripts"
+url = os.getenv("GCP_JSON_FILE_LINK")
 
 # Create an Inngest client
 inngest_client = inngest.Inngest(
@@ -28,8 +36,6 @@ inngest_client = inngest.Inngest(
     logger=logging.getLogger("uvicorn"),
     is_production=True
 )
-agent_name = "voice-agent"
-bucket_name = "ai-call-transcripts"
 
 # define function that uploads a file from the bucket
 def upload_cs_file(bucket_name, source_file_name, destination_file_name):
@@ -88,100 +94,121 @@ server = AgentServer()
 
 @server.rtc_session(agent_name=agent_name)
 async def my_agent(ctx: agents.JobContext):
-  # --------------
+    # --------------
+    # Load GCP credentials from credentials.json file.
+    file_contents = requests.get(url).text    
 
-  await ctx.connect()
-  participant = await ctx.wait_for_participant()
-
-  print(participant)
-  print(f"Participant Attributes: {participant.attributes}")
-  print(f"Participant Name: {participant.attributes['name']}")
-
-  async def write_transcript():
-    # Folder-friendly date (YYYY-MM-DD)
-    folder_date = datetime.now().strftime("%Y-%m-%d") 
-    
-    # Precise timestamp for the filename (to avoid overwriting)
-    timestamp = datetime.now().strftime("%H%M%S")
-    
-    # Path inside GCS: i.e "2026-02-10/transcript_room-name_130202.json"
-    gcs_path = f"{folder_date}/transcript_{ctx.room.name}_{timestamp}.json"
-    
-    # Local path for writing the file temporarily on the VM disk
-    # We use a simple name locally to avoid needing to create local folders
-    filename = f"tmp_{timestamp}.json"
-
-    with open(filename, 'w') as f:
-        json.dump(session.history.to_dict(), f, indent=2)
-
-    # Saving to Google Cloud
-    upload_cs_file(bucket_name, filename, gcs_path)
-
-    public_url = get_cs_file_url(bucket_name, gcs_path)
-    print(f"Transcript for {ctx.room.name} saved to {public_url}")
-    
-    # Prepare data to trigger event in inngest
-    payload = {
-        "transcript_url": public_url,
-        "user": {
-          "name": participant.attributes['name'],
-          "phone": participant.attributes['sip.phoneNumber']
-        }
-    }
-
-    # Sending event to inngest
-    await inngest_client.send(
-        inngest.Event(
-            name="livekit/call.completed",
-            data=payload
-        )
+    random_string = "".join(random.choices(string.ascii_letters + string.digits, k=12))
+    unique_time = datetime.now().strftime("%Y-%m-%dT%H%M%S") + f"-{random_string}"
+    # Set up recording
+    req = api.RoomCompositeEgressRequest(
+        room_name=ctx.room.name,#"my-room",
+        layout="speaker",
+        audio_only=True,
+        file=api.EncodedFileOutput(
+            filepath=f"{ctx.room.name}/agent-{unique_time}.ogg",
+            gcp=api.GCPUpload(
+                credentials=file_contents,
+                bucket="voice-ai-call-recordings",
+            ),
+        ),
     )
 
-    return f"Call transcript {public_url} sent and inngest event triggered"
+    res = await ctx.api.egress.start_room_composite_egress(req)
+    
+    # -----------------
+    await ctx.connect()
+    participant = await ctx.wait_for_participant()
 
-  ctx.add_shutdown_callback(write_transcript)
+    print(participant)
+    print(f"Participant Attributes: {participant.attributes}")
+    print(f"Participant Name: {participant.attributes['name']}")
 
+    async def write_transcript():
+        # Folder-friendly date (YYYY-MM-DD)
+        folder_date = datetime.now().strftime("%Y-%m-%d") 
+        
+        # Precise timestamp for the filename (to avoid overwriting)
+        timestamp = datetime.now().strftime("%H%M%S")
+        
+        # Path inside GCS: i.e "2026-02-10/transcript_room-name_130202.json"
+        gcs_path = f"{folder_date}/transcript_{ctx.room.name}_{timestamp}.json"
+        
+        # Local path for writing the file temporarily on the VM disk
+        # We use a simple name locally to avoid needing to create local folders
+        filename = f"tmp_{timestamp}.json"
 
-#   # Amazon Nova Sonic (Realtime)
-#   session = AgentSession(
-#     llm=aws.realtime.RealtimeModel(
-#         voice="tiffany"
-#     ),
-#   )
+        with open(filename, 'w') as f:
+            json.dump(session.history.to_dict(), f, indent=2)
 
-  # STT-LLM-TTS Pipeline
-  session = AgentSession(
-    stt = cartesia.STT(
-        model="ink-whisper"
-    ),
-    llm=google.LLM(
-        model="gemini-3.1-pro-preview",
-    ),
-    tts=cartesia.TTS(
-        model="sonic-3",
-        voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",
-        # voice="228fca29-3a0a-435c-8728-5cb483251068"
-    ),
-    turn_detection=EnglishModel(),
-    vad=silero.VAD.load(),
-    mcp_servers=[
-        mcp.MCPServerHTTP(
-            "https://dc33-102-209-109-143.ngrok-free.app/mcp"
+        # Saving to Google Cloud
+        upload_cs_file(bucket_name, filename, gcs_path)
+
+        public_url = get_cs_file_url(bucket_name, gcs_path)
+        print(f"Transcript for {ctx.room.name} saved to {public_url}")
+        
+        # Prepare data to trigger event in inngest
+        payload = {
+            "transcript_url": public_url,
+            "user": {
+            "name": participant.attributes['name'],
+            "phone": participant.attributes['sip.phoneNumber']
+            }
+        }
+
+        # Sending event to inngest
+        await inngest_client.send(
+            inngest.Event(
+                name="livekit/call.completed",
+                data=payload
+            )
         )
-    ]
 
-  )
+        return f"Call transcript {public_url} sent and inngest event triggered"
 
-  await session.start(
-     
-    room=ctx.room,
-    agent=ContextAgent(participant.attributes),
-    room_options=room_io.RoomOptions(
-        audio_input=room_io.AudioInputOptions(
-            noise_cancellation=lambda params: noise_cancellation.BVCTelephony() if params.participant.kind == rtc.ParticipantKind.PARTICIPANT_KIND_SIP else noise_cancellation.BVC(),
+    ctx.add_shutdown_callback(write_transcript)
+
+
+    #   # Amazon Nova Sonic (Realtime)
+    #   session = AgentSession(
+    #     llm=aws.realtime.RealtimeModel(
+    #         voice="tiffany"
+    #     ),
+    #   )
+
+    # STT-LLM-TTS Pipeline
+    session = AgentSession(
+        stt = cartesia.STT(
+            model="ink-whisper"
         ),
-    ),
-  )
+        llm=google.LLM(
+            model="gemini-3.1-pro-preview",
+        ),
+        tts=cartesia.TTS(
+            model="sonic-3",
+            voice="f786b574-daa5-4673-aa0c-cbe3e8534c02",
+            # voice="228fca29-3a0a-435c-8728-5cb483251068"
+        ),
+        turn_detection=EnglishModel(),
+        vad=silero.VAD.load(),
+        mcp_servers=[
+            mcp.MCPServerHTTP(
+                "https://7db8-102-203-209-110.ngrok-free.app/mcp"
+            )
+        ]
+
+    )
+
+    await session.start(
+        
+        room=ctx.room,
+        agent=ContextAgent(participant.attributes),
+        room_options=room_io.RoomOptions(
+            audio_input=room_io.AudioInputOptions(
+                noise_cancellation=lambda params: noise_cancellation.BVCTelephony() if params.participant.kind == rtc.ParticipantKind.PARTICIPANT_KIND_SIP else noise_cancellation.BVC(),
+            ),
+        ),
+    )
 
 
 if __name__ == "__main__":
