@@ -93,7 +93,7 @@ jobs:
                   -e INNGEST_SIGNING_KEY="$INNGEST_SIGNING_KEY" \
                   -e CARTESIA_API_KEY="$CARTESIA_API_KEY" \
                   -e GOOGLE_API_KEY="$GOOGLE_API_KEY" \
-                  - GCP_JSON_FILE_LINK="$GCP_JSON_FILE_LINK" \
+                  -e GCP_JSON_FILE_LINK="$GCP_JSON_FILE_LINK" \
                   --name livekit-agent livekit-agent
                 echo "Cleaning up unused images..."
                 sudo docker image prune -f || true
