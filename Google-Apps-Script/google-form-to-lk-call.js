@@ -27,8 +27,6 @@ function onSubmit(e) {
     if (mappedKey) {
       formData[mappedKey] = answer;
     }
-
-
   }
 
   // The Payload: Inngest expects an OBJECT for a single event via the /e/ endpoint

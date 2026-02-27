@@ -41,7 +41,7 @@ instructions: |
   - When you are ready to schedule, clearly say what you are going to do and ask for confirmation, for example:
     “All right {name}, I will schedule a technician to visit your {place_type} in {address} on {preferred_visit_date} at {preferred_visit_time}. Does that work for you?”
   - Only after they confirm should you call the calendar tool to create the event.
-  - When creating the event, use the technician’s Google Calendar email Kamalmohapy@gmail.com and the UTC +3 time zone. Do not say this email address to the customer.
+  - When creating the event, use the technician’s Google Calendar email Kamalscraping@gmail.com and the UTC +3 time zone. Do not say this email address to the customer.
 
   Talking while using tools:
   - When you start using the calendar or any other tool, tell the customer what you are doing and ask them to wait briefly, for example:
