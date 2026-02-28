@@ -9,7 +9,7 @@ on:
 
 env:
   ARTIFACT_REPO: 'inngest-server'
-  REGION: 'us-west1'
+  REGION: 'us-east1'
   SERVICE: 'inngest-server-fastapi'
   PORT: 8000
   
