@@ -47,6 +47,7 @@ I have created a Voice AI system that's able to;
 The Voice AI Agent qualifies the lead in real-time, books appointments on your calendar, and sends you the legit leads. It then analyzes the call, categorizes the lead and instantly updates your CRM.
 
 ## Architecture
+<img width="889" height="462" alt="architecture" src="https://github.com/user-attachments/assets/1241c494-e331-49b8-b752-3db1a04b270d" />
 
 
 ## How this Voice AI System works
@@ -58,6 +59,8 @@ The Voice AI Agent takes these actions as soon as an inquiry form is filled;
 4. Book a job/appointment on the business calendar
 5. Categorize the lead (whether lead is high/medium/low)
 6. Save call summary on a CRM (i.e Google Sheets)
+<img width="2160" height="800" alt="Form + Voice AI" src="https://github.com/user-attachments/assets/3cbcdcd7-0ee5-4be8-8f04-e8a39fa32068" />
+
 
 ## Benefits
 With this Voice AI Agent implemented, home service businesses;
