@@ -71,13 +71,13 @@ With this Voice AI Agent implemented, home service businesses;
 5. Will get a lead generation system that books jobs/appointments 24/7/365 and is guaranteed to get better.
 
 ## Tech stack used
-1. Livekit: To build the Voice AI Agent
-2. Inngest: As the Agent Orchestrator
-3. Twilio: Phone carrier
-4. PydanticAI: To summarize the call transcription & provide structured output.
-5. Google Apps Script: To trigger a webhook when user fills a Google Form. It also uploads call summary to Google Sheets
-6. Deployed on Google Cloud.
-7. Used Github Actions to automate deployments
+1. **Livekit**: To build the Voice AI Agent
+2. **Inngest (FastAPI)**: As the Agent Orchestrator
+3. **Twilio**: Phone carrier
+4. **PydanticAI**: To summarize the call transcription & provide structured output.
+5. **Google Apps Script**: To trigger a webhook when user fills a Google Form. It also uploads call summary to Google Sheets
+6. **Cloud Platforms**: Deployed on Google Cloud (GCP).
+7. **Github Actions**: To automate deployments by having a CI/CD pipeline.
 
 ## Resources
 Watch the full video of this Voice AI Agent in use.
