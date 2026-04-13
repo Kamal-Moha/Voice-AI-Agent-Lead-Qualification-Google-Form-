@@ -21,12 +21,11 @@ Home service businesses are bombarded by service inquiries specially during peak
 
 This leads to them losing money because these interested leads are not reached out to and these causes them to lose money.
 
-## Traditional approach followed by most businesses
+## Traditional approach that this plumber followed
 
-In my findings I have noticed that business owners follow this traditional approach;
-1. Business owner (Marketer) runs Facebook Lead Ads.
-2. User (Lead) clicks.
-3. They fill your form.
+The plumber had a Google Form that new leads filled. The plumber followed this approach;
+1. The business has an inquiry form (i.e Google Form).
+2. User (Lead) fills the form.
 
 Then what?
 
